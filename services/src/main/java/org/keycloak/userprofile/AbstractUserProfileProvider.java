@@ -79,6 +79,7 @@ public abstract class AbstractUserProfileProvider<U extends UserProfileProvider>
             case ACCOUNT_OLD:
             case ACCOUNT:
             case UPDATE_PROFILE:
+            case UPDATE_EMAIL:
                 return realm.isEditUsernameAllowed();
             case USER_API:
                 return true;
