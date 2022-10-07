@@ -17,9 +17,6 @@
 
 package org.keycloak.authentication.actiontoken.updateemail;
 
-import java.util.List;
-import java.util.Objects;
-import javax.ws.rs.core.Response;
 import org.keycloak.TokenVerifier;
 import org.keycloak.authentication.actiontoken.AbstractActionTokenHandler;
 import org.keycloak.authentication.actiontoken.ActionTokenContext;
@@ -36,6 +33,10 @@ import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.userprofile.UserProfile;
 import org.keycloak.userprofile.ValidationException;
+
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Objects;
 
 public class UpdateEmailActionTokenHandler extends AbstractActionTokenHandler<UpdateEmailActionToken> {
 
@@ -83,13 +84,17 @@ public class UpdateEmailActionTokenHandler extends AbstractActionTokenHandler<Up
         user.removeRequiredAction(UserModel.RequiredAction.VERIFY_EMAIL);
         tokenContext.getAuthenticationSession().removeRequiredAction(UserModel.RequiredAction.VERIFY_EMAIL);
 
-        return forms.setAttribute("messageHeader", forms.getMessage("emailUpdatedTitle")).setSuccess("emailUpdated", newEmail)
+        String pageRedirectUri = System.getenv("PEGBO_KEYCLOAK_UPDATE_EMAIL_REDIRECT_URI");
+
+        return forms.setAttribute("messageHeader", forms.getMessage("emailUpdatedTitle"))
+                .setSuccess("emailUpdated", newEmail)
+                .setAttribute("pageRedirectUri", pageRedirectUri)
                 .createInfoPage();
     }
 
     @Override
     public boolean canUseTokenRepeatedly(UpdateEmailActionToken token,
-            ActionTokenContext<UpdateEmailActionToken> tokenContext) {
+                                         ActionTokenContext<UpdateEmailActionToken> tokenContext) {
         return false;
     }
 }
