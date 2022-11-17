@@ -26,8 +26,10 @@ import org.keycloak.events.Errors;
 import org.keycloak.events.EventType;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
+import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.sessions.AuthenticationSessionModel;
@@ -37,6 +39,7 @@ import org.keycloak.userprofile.ValidationException;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class UpdateEmailActionTokenHandler extends AbstractActionTokenHandler<UpdateEmailActionToken> {
 
@@ -85,6 +88,12 @@ public class UpdateEmailActionTokenHandler extends AbstractActionTokenHandler<Up
         tokenContext.getAuthenticationSession().removeRequiredAction(UserModel.RequiredAction.VERIFY_EMAIL);
 
         String pageRedirectUri = System.getenv("PEGBO_KEYCLOAK_UPDATE_EMAIL_REDIRECT_URI");
+
+        // remove all user sessions
+        RealmModel realm = tokenContext.getRealm();
+        session.sessions().getUserSessionsStream(realm, user)
+                .collect(Collectors.toList()) // collect to avoid concurrent modification as backchannelLogout removes the user sessions.
+                .forEach(s -> AuthenticationManager.backchannelLogout(session, s, true));
 
         return forms.setAttribute("messageHeader", forms.getMessage("emailUpdatedTitle"))
                 .setSuccess("emailUpdated", newEmail)
