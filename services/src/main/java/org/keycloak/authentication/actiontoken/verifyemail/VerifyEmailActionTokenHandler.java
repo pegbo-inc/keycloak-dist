@@ -88,6 +88,7 @@ public class VerifyEmailActionTokenHandler extends AbstractActionTokenHandler<Ve
             return session.getProvider(LoginFormsProvider.class)
                     .setAuthenticationSession(authSession)
                     .setSuccess(Messages.CONFIRM_EMAIL_ADDRESS_VERIFICATION, user.getEmail())
+                    .setAttribute("pegboAction", "CONFIRM_EMAIL_ADDRESS_VERIFICATION")
                     .setAttribute(Constants.TEMPLATE_ATTR_ACTION_URI, confirmUri)
                     .createInfoPage();
         }
@@ -105,6 +106,7 @@ public class VerifyEmailActionTokenHandler extends AbstractActionTokenHandler<Ve
 
             return tokenContext.getSession().getProvider(LoginFormsProvider.class)
                     .setAuthenticationSession(authSession)
+                    .setAttribute("pegboAction", "EMAIL_VERIFIED")
                     .setSuccess(Messages.EMAIL_VERIFIED)
                     .createInfoPage();
         }
