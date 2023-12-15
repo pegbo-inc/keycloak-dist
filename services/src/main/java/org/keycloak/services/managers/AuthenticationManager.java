@@ -1039,8 +1039,12 @@ public class AuthenticationManager {
         }
 
         if (authSession.getAuthNote(END_AFTER_REQUIRED_ACTIONS) != null) {
+            // I don't know how detect it better
+            boolean emailVerified = event.getEvent() != null && EventType.CUSTOM_REQUIRED_ACTION.equals(event.getEvent().getType());
+            String message = emailVerified ? Messages.EMAIL_VERIFIED : Messages.ACCOUNT_UPDATED;
+
             LoginFormsProvider infoPage = session.getProvider(LoginFormsProvider.class).setAuthenticationSession(authSession)
-                    .setSuccess(Messages.ACCOUNT_UPDATED);
+                    .setSuccess(message);
             if (authSession.getAuthNote(SET_REDIRECT_URI_AFTER_REQUIRED_ACTIONS) != null) {
                 if (authSession.getRedirectUri() != null) {
                     infoPage.setAttribute("pageRedirectUri", authSession.getRedirectUri());
@@ -1049,6 +1053,10 @@ public class AuthenticationManager {
             } else {
                 infoPage.setAttribute(Constants.SKIP_LINK, true);
             }
+
+            if (emailVerified)
+                infoPage.setAttribute("pegboAction", "EMAIL_VERIFIED");
+
             Response response = infoPage
                     .createInfoPage();
 

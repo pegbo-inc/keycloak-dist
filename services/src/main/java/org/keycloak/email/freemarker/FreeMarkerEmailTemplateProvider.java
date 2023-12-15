@@ -38,10 +38,7 @@ import org.keycloak.email.freemarker.beans.ProfileBean;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
 import org.keycloak.forms.login.freemarker.model.UrlBean;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakUriInfo;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.theme.FreeMarkerException;
 import org.keycloak.theme.FreeMarkerUtil;
@@ -168,7 +165,14 @@ public class FreeMarkerEmailTemplateProvider implements EmailTemplateProvider {
 
         attributes.put("realmName", getRealmName());
 
-        send("executeActionsSubject", "executeActions.ftl", attributes);
+        List<String> requiredActions = (List<String>) attributes.get(Constants.TEMPLATE_ATTR_REQUIRED_ACTIONS);
+        String subject;
+        if(requiredActions != null && requiredActions.size() == 1 && "VERIFY_EMAIL".equals(requiredActions.get(0)))
+            subject = "emailVerificationSubject";
+        else
+            subject = "executeActionsSubject";
+
+        send(subject, "executeActions.ftl", attributes);
     }
 
     @Override
